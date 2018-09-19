@@ -18,20 +18,9 @@ class Sort {
         }
 
         if($aftertoday){
-            $today = strtotime(date('Y-m-d'));
 
-            foreach($array as $k => $o)
-            {
-                if($type === 'object'){
-                    if(strtotime($o->{$key}) - $today < 0){
-                        unset($array[$k]);
-                    }
-                } else {
-                    if(strtotime($o[$key]) - $today < 0){
-                        unset($array[$k]);
-                    }
-                }
-            }
+            $array = $this->removeAfterToday($array, $type);
+
         }
 
         $result = $this->uSort($array, $type, $key, $direction);
@@ -62,6 +51,38 @@ class Sort {
                 });
             }
         }
+        return $array;
+    }
+
+    protected function removeAfterToday($array, $type)
+    {
+        $today = strtotime(date('Y-m-d'));
+
+        foreach($array as $k => $o)
+        {
+            if($type === 'object'){
+                // First we check if it's a date type
+                if (false === strtotime($o->{$key})) {
+                    $dateTime = new DateTime($o->{$key});
+                    $date = $dateTime->format('Y-m-d');
+                    $o->{$key} = $date;
+                }
+                if(strtotime($o->{$key}) - $today < 0){
+                    unset($array[$k]);
+                }
+                    
+            } else {
+                if (false === strtotime($o[$key])) {
+                    $dateTime = new DateTime($o[$key]);
+                    $date = $dateTime->format('Y-m-d');
+                    $o[$key] = $date;
+                }
+                if(strtotime($o[$key]) - $today < 0){
+                    unset($array[$k]);
+                }
+            }
+        }
+
         return $array;
     }
 }
